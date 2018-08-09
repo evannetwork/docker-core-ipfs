@@ -1,0 +1,78 @@
+version: '2'
+services:
+  ipfs-cluster:
+    image: evannetwork/ipfs-cluster
+    container_name: ipfs_cluster
+    restart: always
+    environment:
+      - IPFS_API=\/ip4\/172.16.0.2\/tcp\/5001
+      - IPFS_CLUSTER_SECRET=CLUSTER_SECRET_REPLACE_KEY
+      - IPFS_CLUSTER_BOOTSTRAP_NODE=\/ip4\/18.196.211.140\/tcp\/9096\/ipfs\/QmaaPzvrYK5H1fSmJN3zudwLG1XPMkBXJTg9i2tC9JiKRC
+    volumes:
+      - ./ipfs-cluster-data:/data/ipfs-cluster
+    ports:
+      - "9096:9096"
+    networks:
+      ipfs_cluster_net:
+        ipv4_address: 172.16.0.3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"          
+
+  ipfs-node:
+    image:  evannetwork/go-ipfs
+    container_name: ipfs_node
+    restart: always
+    expose:
+      - "5001"
+    ports:
+      - "4001:4001"
+    volumes:
+      - ipfs-data:/data/ipfs
+      - ipfs-staging:/export
+    networks:
+      ipfs_cluster_net:
+        ipv4_address: 172.16.0.2
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"          
+
+  nginx-ipfs:
+    image: evannetwork/nginx-ipfs
+    container_name: nginx_ipfs
+    restart: always
+    command: /bin/sh -c "envsubst '$$SSL_DOMAIN $$IPFS_SERVER_NAME' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g                                                                                          'daemon off;'"
+    environment:
+      - SSL_DOMAIN=ipfs.evan.network
+      - IPFS_SERVER_NAME=ipfs.evan.network
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-config/ssl:/ssl
+    networks:
+      ipfs_cluster_net:
+        ipv4_address: 172.16.0.4
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"          
+
+volumes:
+  ipfs-data:
+  ipfs-staging:
+  ipfs-cluster-data:
+
+networks:
+  ipfs_cluster_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.0.1/24
+        gateway: 172.16.0.1
