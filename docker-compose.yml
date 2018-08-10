@@ -40,12 +40,12 @@ services:
       options:
         max-size: "10m"
         max-file: "5"          
-
+       
   nginx-ipfs:
-    image: evannetwork/nginx-ipfs
+    image: evannetwork/nginx-ipfs:latest  # can't use vanilla nginx for the lua access scripts
     container_name: nginx_ipfs
     restart: always
-    command: /bin/sh -c "envsubst '$$SSL_DOMAIN $$IPFS_SERVER_NAME' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g                                                                                          'daemon off;'"
+    command: /bin/sh -c "envsubst '$$SSL_DOMAIN $$IPFS_SERVER_NAME' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -c /etc/nginx/nginx.conf -g 'daemon off;'"
     environment:
       - SSL_DOMAIN=ipfs.evan.network
       - IPFS_SERVER_NAME=ipfs.evan.network
@@ -61,7 +61,25 @@ services:
       driver: "json-file"
       options:
         max-size: "10m"
-        max-file: "5"          
+        max-file: "5"
+
+  blacklist-redis:
+    image: evannetwork/blacklist-redis:latest
+    container_name: blacklist-redis
+    restart: always
+    tmpfs:
+      - /data
+    expose:
+      - "6379"
+    networks:
+      ipfs_cluster_net:
+        ipv4_address: 172.16.0.5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    
 
 volumes:
   ipfs-data:
