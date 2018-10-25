@@ -15,6 +15,12 @@ fi
 
 if [ -e "$IPFS_PATH/config" ]; then
   echo "Found IPFS fs-repo at $IPFS_PATH"
+  
+  if [ -z "$IPFS_STORAGE_MAX" ]; then
+    ipfs config Datastore.StorageMax '$IPFS_STORAGE_MAX'
+  else
+    ipfs config Datastore.StorageMax '50GB'
+  fi
 else
   ipfs init --profile=server
 
@@ -31,6 +37,11 @@ else
   ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST", "HEAD"]'
   ipfs config --json API.HTTPHeaders.Access-Control-Allow-Credentials '["true"]'
   ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http://localhost:3000","https://ipfs.evan.network","https://dashboard.evan.network"]'
+  if [ -z "$IPFS_STORAGE_MAX" ]; then
+    ipfs config Datastore.StorageMax '$IPFS_STORAGE_MAX'
+  else
+    ipfs config Datastore.StorageMax '50GB'
+  fi
 fi
 
 exec ipfs daemon --migrate=true

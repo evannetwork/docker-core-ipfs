@@ -1,4 +1,4 @@
-FROM ipfs/ipfs-cluster:v0.3.3
+FROM ipfs/ipfs-cluster:v0.6.0
 
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
