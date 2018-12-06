@@ -65,6 +65,23 @@ services:
         max-size: "10m"
         max-file: "5"          
 
+  blacklist-redis:
+    image: evannetwork/blacklist-redis:latest
+    container_name: blacklist-redis
+    restart: always
+    tmpfs:
+      - /data
+    expose:
+      - "6379"
+    networks:
+      ipfs_cluster_net:
+        ipv4_address: 172.16.0.5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
 volumes:
   ipfs-data:
   ipfs-staging:
