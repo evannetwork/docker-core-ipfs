@@ -99,6 +99,7 @@ if authHeader then
                 for k,v in pairs(pinResponse.header) do
                     ngx.header[k] = v
                 end
+                ngx.header["Access-Control-Allow-Origin"] = "*"
                 ngx.say(pinResponse.body)
             else
                 ngx.status = ngx.HTTP_NOT_ALLOWED
