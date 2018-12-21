@@ -126,6 +126,7 @@ else
         for k,v in pairs(pinResponse.header) do
             ngx.header[k] = v
         end
+        ngx.header["Access-Control-Allow-Origin"] = "*"
         ngx.say(pinResponse.body)
     elseif ngx.var.request_type == "add" then
         local ipfsRes = ngx.location.capture( ipfsAddProxy,  { method = ngx.HTTP_POST, body = ngx.req.read_body() })
