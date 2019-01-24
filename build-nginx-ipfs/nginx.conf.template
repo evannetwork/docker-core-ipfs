@@ -61,14 +61,6 @@ http {
         server 172.16.0.3:9094;
     }
 
-    upstream ipfs_cluster_bridge {
-        server 172.16.0.3:9095;
-    }
-
-    upstream parity {
-        server 172.16.0.6:8080;
-    }
-
     lua_package_path "/usr/share/lua/5.1/?.lua;;";
     lua_shared_dict redis_connections 32k;
     server {
@@ -206,9 +198,9 @@ http {
             internal;
             rewrite    ^/parityproxy/(.*)  /$1  break;
             resolver 8.8.8.8 ipv6=off; #  AWS DNS resolver address is the same in all regions - 172.16.0.23
-            proxy_read_timeout 25s;
-            proxy_send_timeout 25s;
-            proxy_connect_timeout 25s;
+            proxy_read_timeout 120s;
+            proxy_send_timeout 120s;
+            proxy_connect_timeout 120s;
             proxy_pass https://testcore.evan.network;
             proxy_set_header Content-Type "application/json";
             proxy_set_header Accept-Encoding  "";
@@ -217,9 +209,9 @@ http {
 
         location /ipfsaddproxy/ {
             internal;
-            proxy_read_timeout 25s;
-            proxy_send_timeout 25s;
-            proxy_connect_timeout 25s;
+            proxy_read_timeout 120s;
+            proxy_send_timeout 120s;
+            proxy_connect_timeout 120s;
             proxy_pass http://ipfs_api/api/v0/;
             proxy_pass_request_headers on;
         }
@@ -227,11 +219,21 @@ http {
         location /ipfscatproxy {
             internal;
             rewrite    ^/ipfscatproxy/(.*)  /api/v0/$1  break;
-            proxy_read_timeout 5s;
-            proxy_send_timeout 5s;
-            proxy_connect_timeout 5s;
+            proxy_read_timeout 120s;
+            proxy_send_timeout 120s;
+            proxy_connect_timeout 120s;
             proxy_pass http://ipfs_api;
             proxy_pass_request_headers off;
         }
+
+        location /paymentProxy/ {
+            internal;
+            proxy_read_timeout 120s;
+            proxy_send_timeout 120s;
+            proxy_connect_timeout 120s;
+            proxy_pass http://payment/api/ipfs-payments/;
+            proxy_pass_request_headers on;
+        }
+
     }
 }

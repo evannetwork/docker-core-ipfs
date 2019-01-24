@@ -1,7 +1,8 @@
 local ipfsAddProxy = "/ipfsaddproxy/add"
-local ipfsCatProxy = "/ipfscatproxy/cat" 
+local ipfsCatProxy = "/ipfscatproxy/cat"
 local ipfsPinAddProxy = "/ipfscatproxy/pin/add"
 local ipfsPinRmProxy = "/ipfscatproxy/pin/rm"
+local paymentProxy = "/paymentProxy/pay"
 local proxyUrl = "/parityproxy"
 local cjson = require "cjson"
 
@@ -53,7 +54,7 @@ function addFileMetaIpfsFile(hash, accountId, check)
     end
     local parsedBody = cjson.decode(ipfsMeta.body)
     return parsedBody
-    
+
 end
 
 function getIpfsFile(hash)
@@ -67,10 +68,19 @@ end
 
 function addOrRemovePin(hash, type)
     local response = nil
+
+    paymentResponse = ngx.location.capture( paymentProxy .. '?hash=' .. hash .. '&type=' .. type)
+    local parsedPaymentResponse = cjson.decode(paymentResponse.body)
+    if parsedPaymentResponse.status == "error" then
+        ngx.status = ngx.HTTP_NOT_ALLOWED
+        ngx.say(parsedPaymentResponse.error)
+        -- to cause quit the whole request rather than the current phase handler
+        ngx.exit(ngx.HTTP_NOT_ALLOWED)
+    end
     if type == "add" then
-      response = ngx.location.capture( ipfsPinAddProxy .. '?arg=' .. hash)
+        response = ngx.location.capture( ipfsPinAddProxy .. '?arg=' .. hash)
     elseif type == "rm" then
-      response = ngx.location.capture( ipfsPinRmProxy .. '?arg=' .. hash)
+        response = ngx.location.capture( ipfsPinRmProxy .. '?arg=' .. hash)
     end
     return response
 end
@@ -82,6 +92,9 @@ function recoverMessage(values)
     local parsedBody = cjson.decode(res.body)
     return parsedBody
 end
+
+-- read the body initally
+ngx.req.read_body()
 
 local authHeader = ngx.req.get_headers()["Authorization"]
 -- check 3 authHeaders
@@ -105,7 +118,7 @@ if authHeader then
                 ngx.status = ngx.HTTP_NOT_ALLOWED
             end
         elseif ngx.var.request_type == "add" then
-            local ipfsRes = ngx.location.capture( ipfsAddProxy,  { method = ngx.HTTP_POST, body = ngx.req.read_body() })
+            local ipfsRes = ngx.location.capture( ipfsAddProxy,  { method = ngx.HTTP_POST, body = ngx.req.get_body_data() })
             for line in ipfsRes.body:gmatch("[^\r\n]+") do
                 local parsedIpfsRes = cjson.decode(line)
                 addFileMetaIpfsFile(parsedIpfsRes.Hash, recoveredAddress.result, false)
@@ -129,7 +142,7 @@ else
         ngx.header["Access-Control-Allow-Origin"] = "*"
         ngx.say(pinResponse.body)
     elseif ngx.var.request_type == "add" then
-        local ipfsRes = ngx.location.capture( ipfsAddProxy,  { method = ngx.HTTP_POST, body = ngx.req.read_body() })
+        local ipfsRes = ngx.location.capture( ipfsAddProxy,  { method = ngx.HTTP_POST, body = ngx.req.get_body_data() })
         for k,v in pairs(ipfsRes.header) do
             ngx.header[k] = v
         end
