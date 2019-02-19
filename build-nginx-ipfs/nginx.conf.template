@@ -7,8 +7,8 @@ http {
     sendfile        on;
     #tcp_nopush     on;
 
-    client_max_body_size 40m;
-    client_body_buffer_size 40m;
+    client_max_body_size 100m;
+    client_body_buffer_size 100m;
     # based off html5-boilerplate
     gzip on;
     gzip_comp_level    5;
@@ -45,10 +45,6 @@ http {
       text/x-cross-domain-policy;
     # text/html is always compressed by gzip module
 
-    upstream websocket {
-        server 172.16.0.2:8081;
-    }
-
     upstream ipfs {
         server 172.16.0.2:8080;
     }
@@ -70,10 +66,8 @@ http {
         return 301 https://$host$request_uri;
     }
 
-
     server {
-        listen 443 ssl;
-
+        listen 443 ssl default_server;
         ssl_certificate /ssl/${SSL_DOMAIN}.chained.crt;
         ssl_certificate_key /ssl/${SSL_DOMAIN}.key;
 
@@ -201,7 +195,7 @@ http {
             proxy_read_timeout 120s;
             proxy_send_timeout 120s;
             proxy_connect_timeout 120s;
-            proxy_pass https://testcore.evan.network;
+            proxy_pass ${CHAIN_ENDPOINT};
             proxy_set_header Content-Type "application/json";
             proxy_set_header Accept-Encoding  "";
 
@@ -231,7 +225,7 @@ http {
             proxy_read_timeout 120s;
             proxy_send_timeout 120s;
             proxy_connect_timeout 120s;
-            proxy_pass http://payment/api/ipfs-payments/;
+            proxy_pass ${PAYMENTS_ENDPOINT}/api/ipfs-payments/;
             proxy_pass_request_headers on;
         }
 

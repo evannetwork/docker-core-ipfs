@@ -133,19 +133,5 @@ if authHeader then
         ngx.status = ngx.HTTP_NOT_ALLOWED
     end
 else
-    if ngx.var.request_type == "pin" then
-        local args = ngx.req.get_uri_args()
-        local pinResponse = addOrRemovePin(args.arg, ngx.var.pin_type)
-        for k,v in pairs(pinResponse.header) do
-            ngx.header[k] = v
-        end
-        ngx.header["Access-Control-Allow-Origin"] = "*"
-        ngx.say(pinResponse.body)
-    elseif ngx.var.request_type == "add" then
-        local ipfsRes = ngx.location.capture( ipfsAddProxy,  { method = ngx.HTTP_POST, body = ngx.req.get_body_data() })
-        for k,v in pairs(ipfsRes.header) do
-            ngx.header[k] = v
-        end
-        ngx.say(ipfsRes.body)
-    end
+    ngx.status = ngx.HTTP_NOT_ALLOWED
 end

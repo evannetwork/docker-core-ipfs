@@ -6,8 +6,8 @@ services:
     restart: always
     environment:
       - IPFS_API=\/ip4\/172.16.0.2\/tcp\/5001
-      - IPFS_CLUSTER_SECRET=4014856915741f832b288382515153353626c002a2f10051311435de250a1f70
-    command: daemon --bootstrap /ip4/18.196.211.140/tcp/9096/ipfs/QmTDpbNwrYJqjxhXWwEzeHHy8sodPjLqKyofkQQKNimnvT
+      - IPFS_CLUSTER_SECRET=SECRET
+    command: daemon --bootstrap PEER
     volumes:
       - ./ipfs-cluster-data:/data/ipfs-cluster
     ports:
