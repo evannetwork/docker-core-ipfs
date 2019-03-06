@@ -2,7 +2,7 @@ local ipfsAddProxy = "/ipfsaddproxy/add"
 local ipfsCatProxy = "/ipfscatproxy/cat"
 local ipfsPinAddProxy = "/ipfscatproxy/pin/add"
 local ipfsPinRmProxy = "/ipfscatproxy/pin/rm"
-local paymentProxy = "/paymentProxy/pay"
+local paymentProxy = "/paymentProxy/hash/add"
 local proxyUrl = "/parityproxy"
 local cjson = require "cjson"
 
