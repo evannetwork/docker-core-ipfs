@@ -159,28 +159,6 @@ http {
             proxy_set_header Host $host;
         }
 
-        location /pins {
-            if ($request_method = 'OPTIONS') {
-                # Preflight request
-                add_header 'Access-Control-Allow-Origin' '*';
-                add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
-                add_header 'Access-Control-Allow-Headers' 'X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
-                add_header 'Access-Control-Max-Age' 1728000;
-                add_header 'Content-Type' 'text/plain; charset=utf-8';
-                add_header 'Content-Length' 0;
-                return 204;
-            }
-            # Pass request to IPFS cluster bridge
-            proxy_http_version 1.1;
-            proxy_pass http://ipfs_cluster_api;
-
-
-            # Overwrite IPFS cluster CORS header
-            add_header "Access-Control-Allow-Origin" $http_origin always;
-            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
-            add_header 'Access-Control-Allow-Headers' 'X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
-        }
-
         location / {
             access_by_lua_file /etc/nginx/ngx_ipfs_blacklist.lua;
             proxy_pass http://ipfs;
@@ -192,9 +170,9 @@ http {
             internal;
             rewrite    ^/parityproxy/(.*)  /$1  break;
             resolver 8.8.8.8 ipv6=off; #  AWS DNS resolver address is the same in all regions - 172.16.0.23
-            proxy_read_timeout 120s;
-            proxy_send_timeout 120s;
-            proxy_connect_timeout 120s;
+            proxy_read_timeout 1h;
+            proxy_send_timeout 1h;
+            proxy_connect_timeout 1h;
             proxy_pass ${CHAIN_ENDPOINT};
             proxy_set_header Content-Type "application/json";
             proxy_set_header Accept-Encoding  "";
@@ -203,9 +181,9 @@ http {
 
         location /ipfsaddproxy/ {
             internal;
-            proxy_read_timeout 120s;
-            proxy_send_timeout 120s;
-            proxy_connect_timeout 120s;
+            proxy_read_timeout 1h;
+            proxy_send_timeout 1h;
+            proxy_connect_timeout 1h;
             proxy_pass http://ipfs_api/api/v0/;
             proxy_pass_request_headers on;
         }
@@ -213,20 +191,29 @@ http {
         location /ipfscatproxy {
             internal;
             rewrite    ^/ipfscatproxy/(.*)  /api/v0/$1  break;
-            proxy_read_timeout 120s;
-            proxy_send_timeout 120s;
-            proxy_connect_timeout 120s;
+            proxy_read_timeout 1h;
+            proxy_send_timeout 1h;
+            proxy_connect_timeout 1h;
             proxy_pass http://ipfs_api;
             proxy_pass_request_headers off;
         }
 
         location /paymentProxy/ {
             internal;
+            proxy_read_timeout 1h;
+            proxy_send_timeout 1h;
+            proxy_connect_timeout 1h;
+            proxy_pass ${PAYMENTS_ENDPOINT}/api/smart-agents/ipfs-payments/;
+            proxy_pass_request_headers on;
+        }
+
+        location /clusterapi/ {
+            internal;
             proxy_read_timeout 120s;
             proxy_send_timeout 120s;
             proxy_connect_timeout 120s;
-            proxy_pass ${PAYMENTS_ENDPOINT}/api/smart-agents/ipfs-payments/;
-            proxy_pass_request_headers on;
+            proxy_pass http://ipfs_cluster_api/;
+            proxy_pass_request_headers off;
         }
 
     }

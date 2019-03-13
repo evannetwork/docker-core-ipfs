@@ -35,12 +35,12 @@ else
     fi
     if [ -n "$IPFS_CLUSTER_DISABLE_LEAVE" ]; then
         sed -i 's/^\(\s*"leave_on_shutdown":\s*\)\w*/\1false/' "${IPFS_CLUSTER_PATH}/service.json"
-    else 
+    else
         sed -i 's/^\(\s*"leave_on_shutdown":\s*\)\w*/\1true/' "${IPFS_CLUSTER_PATH}/service.json"
-    fi    
-    # change replication factors 
+    fi
+    # change replication factors
     sed -i '/replication_factor_min/c\    \"replication_factor_min\": 1,' "${IPFS_CLUSTER_PATH}/service.json"
-    sed -i '/replication_factor_max/c\    \"replication_factor_max\": 3,' "${IPFS_CLUSTER_PATH}/service.json"
+    sed -i '/replication_factor_max/c\    \"replication_factor_max\": 5,' "${IPFS_CLUSTER_PATH}/service.json"
     # change state sync intervals to 1h
     sed -i '/state_sync_interval/c\    \"state_sync_interval\": \"60m0s\",' "${IPFS_CLUSTER_PATH}/service.json"
     sed -i '/ipfs_sync_interval/c\    \"ipfs_sync_interval\": \"60m0s\",' "${IPFS_CLUSTER_PATH}/service.json"

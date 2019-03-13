@@ -1,13 +1,13 @@
 version: '2'
 services:
   ipfs-cluster:
-    image: evannetwork/ipfs-cluster
+    image: evannetwork/ipfs-cluster:v0.10.0
     container_name: ipfs_cluster
     restart: always
     environment:
       - IPFS_API=\/ip4\/172.16.0.2\/tcp\/5001
       - IPFS_CLUSTER_SECRET=SECRET
-    command: daemon --bootstrap PEER
+    command: daemon --upgrade --bootstrap PEER
     volumes:
       - ./ipfs-cluster-data:/data/ipfs-cluster
     ports:
@@ -21,17 +21,20 @@ services:
         max-size: "10m"
         max-file: "5"
   ipfs-node:
-    image:  evannetwork/go-ipfs
+    image:  evannetwork/go-ipfs:v0.4.19
     container_name: ipfs_node
     restart: always
     environment:
-      - IPFS_STORAGE_MAX=50GB
+      - IPFS_STORAGE_MAX=10GB
+      - IPFS_ORIGIN_ALLOW=[]
+      - IPFS_BOOTSTRAP_PEERS=
     expose:
       - "5001"
     ports:
       - "4001:4001"
     volumes:
       - ipfs-data:/data/ipfs
+      - ./swarm-key/swarm.key:/data/ipfs/swarm.key
       - ipfs-staging:/export
     networks:
       ipfs_cluster_net:
@@ -50,9 +53,11 @@ services:
     environment:
       - SSL_DOMAIN=ipfs.evan.network
       - IPFS_SERVER_NAME=ipfs.evan.network
+      - PAYMENTS_ENDPOINT=https://payments.test.evan.network
+      - CHAIN_ENDPOINT=https://testcore.evan.network
     ports:
       - "80:80"
-      - "1337:443"
+      - "443:443"
     volumes:
       - ./nginx-config/ssl:/ssl
       - ./build-nginx-ipfs:/etc/nginx/

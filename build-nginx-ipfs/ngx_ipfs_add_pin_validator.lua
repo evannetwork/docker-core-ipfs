@@ -68,8 +68,13 @@ end
 
 function addOrRemovePin(hash, type)
     local response = nil
-
-    paymentResponse = ngx.location.capture( paymentProxy .. '?hash=' .. hash .. '&type=' .. type)
+    local agentType = nil
+    if type == "add" then
+        agentType = type
+    elseif type == "rm" then
+        agentType = "remove"
+    end
+    paymentResponse = ngx.location.capture( paymentProxy .. '/' .. agentType .. '?hash=' .. hash)
     local parsedPaymentResponse = cjson.decode(paymentResponse.body)
     if parsedPaymentResponse.status == "error" then
         ngx.status = ngx.HTTP_NOT_ALLOWED

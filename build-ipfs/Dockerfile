@@ -1,7 +1,8 @@
-FROM ipfs/go-ipfs:v0.4.18
+FROM ipfs/go-ipfs:v0.4.19
 
-COPY ./entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN dos2unix /usr/local/bin/entrypoint.sh
-RUN chmod a+x /usr/local/bin/entrypoint.sh
+COPY ./entrypoint.sh /home/ipfs/entrypoint.sh
+USER root
+RUN dos2unix /home/ipfs/entrypoint.sh
+RUN chmod a+x /home/ipfs/entrypoint.sh
 
-ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/home/ipfs/entrypoint.sh"]
