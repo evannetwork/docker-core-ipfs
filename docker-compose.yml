@@ -49,7 +49,7 @@ services:
     image: evannetwork/nginx-ipfs
     container_name: nginx_ipfs
     restart: always
-    command: /bin/sh -c "envsubst '$$SSL_DOMAIN $$IPFS_SERVER_NAME' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;' -c '/etc/nginx/nginx.conf'"
+    command: /bin/sh -c "envsubst '$$SSL_DOMAIN $$IPFS_SERVER_NAME $$CHAIN_ENDPOINT $$PAYMENTS_ENDPOINT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;' -c '/etc/nginx/nginx.conf'"
     environment:
       - SSL_DOMAIN=ipfs.evan.network
       - IPFS_SERVER_NAME=ipfs.evan.network

@@ -1,8 +1,7 @@
 local ipfsAddProxy = "/ipfsaddproxy/add"
 local ipfsCatProxy = "/ipfscatproxy/cat"
-local ipfsPinAddProxy = "/ipfscatproxy/pin/add"
-local ipfsPinRmProxy = "/ipfscatproxy/pin/rm"
-local paymentProxy = "/paymentProxy/hash/add"
+local ipfsPinProxy = "/clusterapi/pins"
+local paymentProxy = "/paymentProxy/hash"
 local proxyUrl = "/parityproxy"
 local cjson = require "cjson"
 
@@ -68,24 +67,27 @@ end
 
 function addOrRemovePin(hash, type)
     local response = nil
-    local agentType = nil
-    if type == "add" then
-        agentType = type
-    elseif type == "rm" then
-        agentType = "remove"
+    local authHeader = ngx.req.get_headers()["Authorization"]
+    -- check 3 authHeaders
+    if authHeader then
+      if type == "add" then
+          agentType = type
+      elseif type == "rm" then
+          agentType = "remove"
+      end
+      paymentResponse = ngx.location.capture( paymentProxy .. '/' .. agentType .. '?hash=' .. hash)
+        local parsedPaymentResponse = cjson.decode(paymentResponse.body)
+        if parsedPaymentResponse.status == "error" then
+            ngx.status = ngx.HTTP_NOT_ALLOWED
+            ngx.say(parsedPaymentResponse.error)
+            -- to cause quit the whole request rather than the current phase handler
+            ngx.exit(ngx.HTTP_NOT_ALLOWED)
+        end
     end
-    paymentResponse = ngx.location.capture( paymentProxy .. '/' .. agentType .. '?hash=' .. hash)
-    local parsedPaymentResponse = cjson.decode(paymentResponse.body)
-    if parsedPaymentResponse.status == "error" then
-        ngx.status = ngx.HTTP_NOT_ALLOWED
-        ngx.say(parsedPaymentResponse.error)
-        -- to cause quit the whole request rather than the current phase handler
-        ngx.exit(ngx.HTTP_NOT_ALLOWED)
-    end
     if type == "add" then
-        response = ngx.location.capture( ipfsPinAddProxy .. '?arg=' .. hash)
+        response = ngx.location.capture( ipfsPinProxy .. '/' .. hash, { method = ngx.HTTP_POST })
     elseif type == "rm" then
-        response = ngx.location.capture( ipfsPinRmProxy .. '?arg=' .. hash)
+        response = ngx.location.capture( ipfsPinProxy .. '/' .. hash, { method = ngx.HTTP_DELETE })
     end
     return response
 end
@@ -114,11 +116,9 @@ if authHeader then
             local fileAvailable = getIpfsFile(fileHash.Hash)
             if fileAvailable then
                 local pinResponse = addOrRemovePin(args.arg, ngx.var.pin_type)
-                for k,v in pairs(pinResponse.header) do
-                    ngx.header[k] = v
-                end
+                ngx.header["Content-Type"] = "application/json"
                 ngx.header["Access-Control-Allow-Origin"] = "*"
-                ngx.say(pinResponse.body)
+                ngx.say("{\"Pins\":[\"" .. args.arg .. "\"]}")
             else
                 ngx.status = ngx.HTTP_NOT_ALLOWED
             end
@@ -138,5 +138,17 @@ if authHeader then
         ngx.status = ngx.HTTP_NOT_ALLOWED
     end
 else
-    ngx.status = ngx.HTTP_NOT_ALLOWED
+    if ngx.var.request_type == "pin" then
+        local args = ngx.req.get_uri_args()
+        local pinResponse = addOrRemovePin(args.arg, ngx.var.pin_type)
+        ngx.header["Content-Type"] = "application/json"
+        ngx.header["Access-Control-Allow-Origin"] = "*"
+        ngx.say("{\"Pins\":[\"" .. args.arg .. "\"]}")
+    elseif ngx.var.request_type == "add" then
+        local ipfsRes = ngx.location.capture( ipfsAddProxy,  { method = ngx.HTTP_POST, body = ngx.req.get_body_data() })
+        for k,v in pairs(ipfsRes.header) do
+            ngx.header[k] = v
+        end
+        ngx.say(ipfsRes.body)
+    end
 end
