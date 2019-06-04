@@ -60,7 +60,6 @@ services:
       - "443:443"
     volumes:
       - ./nginx-config/ssl:/ssl
-      - ./build-nginx-ipfs:/etc/nginx/
     networks:
       ipfs_cluster_net:
         ipv4_address: 172.16.0.4

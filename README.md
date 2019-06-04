@@ -1,24 +1,24 @@
 # evan.network IPFS node
 
-The storage servers are used to store SmartContract payloads. The evan.network storage concept is based on the IPFS architecture. At least 2 IPFS Nodes should be provided for each MasterNode. The storage servers connect to a distributed network via P2P and ensure the replication and storage of the payload. The nodes are added to DNS load balancing, which distributes users when accessing the IPFS. 
+The storage servers are used to store SmartContract payloads. The evan.network storage concept is based on the IPFS architecture. At least 2 IPFS Nodes should be provided for each AuthorItynode. The storage servers connect to a distributed network via P2P and ensure the replication and storage of the payload. The nodes are added to DNS load balancing, which distributes users when accessing the IPFS.
 
 ## Requirements
 
 The technical requirements to the installed server are :
-AWS: 
- - T2.xlarge /T2.large Instance 
+AWS:
+ - T2.xlarge /T2.large Instance
  - Min. 5000GB EBS storage
 
-Azure: 
- - Standard_D4_v3 / Standard_D2_v3 
- - Min 5000GB Standard storage 
+Azure:
+ - Standard_D4_v3 / Standard_D2_v3
+ - Min 5000GB Standard storage
 
-OnPremise: 
- - 2 Xeon CPU's 
- - 16GB RAM 
+OnPremise:
+ - 2 Xeon CPU's
+ - 16GB RAM
  - 5000GB HDD storage
 
-Open Ports: 
+Open Ports:
  - 80 - HTTP
  - 443 - HTTPS
  - 4001 - IPFS Sync
@@ -38,7 +38,7 @@ To start your ipfs node, you have to simply run "docker-compose up -d" in the di
 
 ## Logging
 
-To access the log file from the masternode, you can use the command "docker logs -f --tail 1000 RUNNING_CONTAINER_NAME" to get the last 1000 log lines from the container. The RUNNING_CONTAINER_NAME can be replaced with the following names:
+To access the log file from the authoritynode, you can use the command "docker logs -f --tail 1000 RUNNING_CONTAINER_NAME" to get the last 1000 log lines from the container. The RUNNING_CONTAINER_NAME can be replaced with the following names:
 
 - ipfs_cluster (IPFS Cluster)
 - ipfs_node (IPFS Node)
