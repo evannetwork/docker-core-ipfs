@@ -18,6 +18,11 @@ OnPremise:
  - 16GB RAM
  - 5000GB HDD storage
 
+DigitalOcean:
+- Standard droplet with
+- 8GB RAM, 4 vCPU, 160gb SSD
+- Min. 1000gb additional block storage
+
 Open Ports:
  - 80 - HTTP
  - 443 - HTTPS
