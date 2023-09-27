@@ -7,21 +7,21 @@ The storage servers are used to store SmartContract payloads. The evan.network s
 The technical requirements to the installed server are :
 AWS:
  - T2.xlarge /T2.large Instance
- - Min. 5000GB EBS storage
+ - Min. 500GB EBS storage
 
 Azure:
  - Standard_D4_v3 / Standard_D2_v3
- - Min 5000GB Standard storage
+ - Min 500GB Standard storage
 
 OnPremise:
  - 2 Xeon CPU's
- - 16GB RAM
- - 5000GB HDD storage
+ - 8GB RAM
+ - 500GB HDD storage
 
 DigitalOcean:
 - Standard droplet with
 - 8GB RAM, 4 vCPU, 160gb SSD
-- Min. 1000gb additional block storage
+- Min. 500gb additional block storage
 
 Open Ports:
  - 80 - HTTP

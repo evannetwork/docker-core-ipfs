@@ -1,15 +1,18 @@
 version: '2'
 services:
   ipfs-cluster:
-    image: evannetwork/ipfs-cluster:v0.10.0
+    image: ipfs/ipfs-cluster:latest
     container_name: ipfs_cluster
     restart: always
     environment:
-      - IPFS_API=\/ip4\/172.16.0.2\/tcp\/5001
-      - IPFS_CLUSTER_SECRET=SECRET
-    command: daemon --upgrade --bootstrap PEER
+      CLUSTER_SECRET: CLUSTER_SECRET
+      CLUSTER_IPFSHTTP_NODEMULTIADDRESS: /dns4/ipfs_node/tcp/5001
+      CLUSTER_CRDT_TRUSTEDPEERS: '*' # Trust all peers in Cluster
+      CLUSTER_RESTAPI_HTTPLISTENMULTIADDRESS: /ip4/0.0.0.0/tcp/9094 # Expose API
+      CLUSTER_MONITORPINGINTERVAL: 2s # Speed up peer discovery
+    command: daemon --upgrade --bootstrap BOOTSTRAP_PEER
     volumes:
-      - ./ipfs-cluster-data:/data/ipfs-cluster
+      - ipfs-cluster-data:/data/ipfs-cluster
     ports:
       - "9096:9096"
     networks:
@@ -21,18 +24,18 @@ services:
         max-size: "10m"
         max-file: "5"
   ipfs-node:
-    image:  evannetwork/go-ipfs:v0.4.19
+    image: ipfs/go-ipfs:latest
     container_name: ipfs_node
     restart: always
     environment:
-      - IPFS_STORAGE_MAX=10GB
-      - IPFS_ORIGIN_ALLOW=[]
-      - IPFS_BOOTSTRAP_PEERS=
+      - IPFS_STORAGE_MAX=300GB
+      - IPFS_BOOTSTRAP_PEER=
     expose:
       - "5001"
     ports:
       - "4001:4001"
     volumes:
+      - ./init-ipfs.sh:/container-init.d/init-ipfs.sh
       - ipfs-data:/data/ipfs
       - ./swarm-key/swarm.key:/data/ipfs/swarm.key
       - ipfs-staging:/export
